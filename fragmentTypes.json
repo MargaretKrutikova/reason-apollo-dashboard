@@ -1,0 +1,18 @@
+{
+  "__schema": {
+    "types": [
+      {
+        "kind": "AssigneeType",
+        "name": "SearchResult",
+        "possibleTypes": [
+          {
+            "name": "User"
+          },
+          {
+            "name": "WorkingGroup"
+          }
+        ]
+      }
+    ]
+  }
+}
