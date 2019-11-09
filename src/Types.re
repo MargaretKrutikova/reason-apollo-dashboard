@@ -23,3 +23,9 @@ type ticket = {
   status,
   lastUpdated: option(string),
 };
+
+type siteStatistics = {
+  weeklySales: float,
+  weeklyOrders: int,
+  currentVisitorsOnline: int,
+};
