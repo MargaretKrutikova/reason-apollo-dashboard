@@ -9,6 +9,7 @@
     "webpack": "webpack -w",
     "webpack:production": "NODE_ENV=production webpack",
     "server": "webpack-dev-server",
+    "deploy:netlify": "npm run clean && npm run build && npm run webpack:production",
     "schema": "apollo client:download-schema graphql_schema.json --endpoint http://localhost:4001 && npm run fragments-codegen",
     "fragments-codegen": "graphql-codegen --config codegen-fragments.yml"
   },
