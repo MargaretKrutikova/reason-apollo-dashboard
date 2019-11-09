@@ -2,8 +2,29 @@
   "__schema": {
     "types": [
       {
-        "kind": "AssigneeType",
-        "name": "SearchResult",
+        "kind": "INTERFACE",
+        "name": "Node",
+        "possibleTypes": [
+          {
+            "name": "User"
+          },
+          {
+            "name": "SiteStatistics"
+          },
+          {
+            "name": "Ticket"
+          },
+          {
+            "name": "WorkingGroup"
+          },
+          {
+            "name": "TodoItem"
+          }
+        ]
+      },
+      {
+        "kind": "UNION",
+        "name": "AssigneeType",
         "possibleTypes": [
           {
             "name": "User"
