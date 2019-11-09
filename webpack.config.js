@@ -9,12 +9,11 @@ module.exports = {
   mode: "development",
   output: {
     path: outputDir,
-    publicPath: "/",
-    filename: "index.js"
+    filename: "Index.js"
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: "index.html"
+      template: "src/index.html"
     }),
     new webpack.DefinePlugin({
       __DEV__: JSON.stringify(process.env.NODE_ENV !== "production")
