@@ -11,6 +11,7 @@ module Fragment = [%graphql
       }
       ... on WorkingGroup @bsRecord {
         id
+        name
       }
     }
     id
@@ -30,8 +31,8 @@ let make = (~ticket) => {
        | Some(assignee) =>
          switch (assignee) {
          | `User(user) => <Avatar user />
-         | `WorkingGroup(workingGroup) => <div />
-         | _ => <span> {React.string("-")} </span>
+         | `WorkingGroup(workingGroup) =>
+           <strong> {React.string(workingGroup.name)} </strong>
          }
        | None => <em> {React.string("Unassigned")} </em>
        }}

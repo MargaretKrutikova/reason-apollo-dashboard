@@ -9,7 +9,10 @@ type user = {
   fullName: string,
 };
 
-type workingGroup = {id: string};
+type workingGroup = {
+  id: string,
+  name: string,
+};
 
 type assignee = [ | `User(user) | `WorkingGroup(workingGroup)];
 
