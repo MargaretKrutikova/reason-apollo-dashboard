@@ -1374,3 +1374,58 @@ ul li {
 
 /*# sourceMappingURL=style.css.map */
 /*spinner*/
+
+/*spinner*/
+
+.Spinner {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotateZ(0deg);
+  }
+  to {
+    transform: rotateZ(360deg);
+  }
+}
+
+.TopLeftAbsoluteSpinner {
+  position: fixed;
+  left: 20px;
+  top: 20px;
+  width: 20px;
+  height: 20px;
+  transform: scale(1.2);
+  visibility: hidden;
+  animation: 0s linear 0.5s forwards makeVisible;
+}
+
+@keyframes makeVisible {
+  to {
+    visibility: visible;
+  }
+}
+
+.BigSpinner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  margin: auto;
+  font-size: 50px;
+  width: 50px;
+  height: 50px;
+}
+
+.DelayedWaitCursor {
+  animation: 0s linear 0.5s forwards makeWaiting;
+}
+
+@keyframes makeWaiting {
+  to {
+    cursor: wait;
+  }
+}
