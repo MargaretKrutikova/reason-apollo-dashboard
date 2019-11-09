@@ -1,39 +1,51 @@
-module TodoQueryConfig = [%graphql
+module AllTodosConfig = [%graphql
   {|
-  {
-	todos(limit: 20, offset:0) {
-    ...Todo.Fragment.TodoItem
-  }
-}
-|}
-];
-module TodoQuery = ReasonApolloHooks.Query.Make(TodoQueryConfig);
-
-module AddTodoConfig = [%graphql
-  {|
-  mutation ($input: AddTodoItemInput!) {
-    addTodoItem(input: $input) {
-      addedTodoItem {
-        ...Todo.Fragment.TodoItem
-      }
+  query {
+    allTodos {
+      ...Todo.Fragment.TodoItem
     }
   }
 |}
 ];
+module AllTodosQuery = ReasonApolloHooks.Query.Make(AllTodosConfig);
 
+module AddTodoConfig = [%graphql
+  {|
+  mutation ($text: String!) {
+    addTodoSimple(text: $text) {
+      ...Todo.Fragment.TodoItem
+    }
+  }
+|}
+];
 module AddTodoMutation = ReasonApolloHooks.Mutation.Make(AddTodoConfig);
 
 [@react.component]
 let make = () => {
-  let (simple, _) = TodoQuery.use();
+  let (todosResult, _) = AllTodosQuery.use();
   let (addTodo, addTodoStatus, _) = AddTodoMutation.use();
 
   let (newTodoText, setNewTodoText) = React.useState(() => "");
+  let canAdd = newTodoText != "" && addTodoStatus != Loading;
 
+  let refetchQueries = [|
+    ReasonApolloHooks.Utils.toQueryObj(AllTodosConfig.make()),
+  |];
   <div className="card">
     <div className="card-body">
       <h4 className="card-title text-white"> {React.string("Todo")} </h4>
-      <form onSubmit={e => ReactEvent.Form.preventDefault(e)}>
+      <form
+        onSubmit={e => {
+          ReactEvent.Form.preventDefault(e);
+
+          addTodo(
+            ~variables=AddTodoConfig.make(~text=newTodoText, ())##variables,
+            ~refetchQueries=_ => refetchQueries,
+            (),
+          )
+          |> Js.Promise.(then_(_ => setNewTodoText(_ => "") |> resolve))
+          |> ignore;
+        }}>
         <div className="add-items d-flex">
           <input
             type_="text"
@@ -49,30 +61,24 @@ let make = () => {
             type_="submit"
             className="add btn btn-gradient-primary font-weight-bold todo-list-add-btn"
             id="add-task"
-            disabled={
-              switch (newTodoText, addTodoStatus) {
-              | ("", _)
-              | (_, Loading) => true
-              | _ => false
-              }
-            }>
+            disabled={!canAdd}>
             {React.string("Add")}
           </button>
         </div>
       </form>
       <div className="list-wrapper">
         <ul className="d-flex flex-column-reverse todo-list todo-list-custom">
-          {switch (simple) {
+          {switch (todosResult) {
            | Data(data) =>
-             {data##todos
+             {data##allTodos
               ->Belt.Array.map(todo =>
-                  switch (todo) {
-                  | Some(todo) => <Todo todo />
-                  | _ => React.null
-                  }
+                  <Todo key={todo.id} todo refetchQueries />
                 )}
              |> React.array
-           | _ => <div> {"Not clear" |> React.string} </div>
+           | Loading => <Spinner />
+           | Error(_) =>
+             <div> {"Ooops! En error occured." |> React.string} </div>
+           | NoData => React.null
            }}
         </ul>
       </div>
