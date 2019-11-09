@@ -1,45 +1,29 @@
-const path = require("path")
-const HtmlWebpackPlugin = require("html-webpack-plugin")
-const outputDir = path.join(__dirname, "../build/context")
+let path = require("path")
+let HtmlWebpackPlugin = require("html-webpack-plugin")
+let webpack = require("webpack")
 
-const isProd = process.env.NODE_ENV === "production"
+let outputDir = path.join(__dirname, "assets")
 
 module.exports = {
   entry: "./src/Index.bs.js",
-  mode: isProd ? "production" : "development",
+  mode: "development",
   output: {
     path: outputDir,
-    filename: "Index.js"
+    publicPath: "/",
+    filename: "index.js"
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: "src/index.html",
-      inject: false
+      template: "index.html"
+    }),
+    new webpack.DefinePlugin({
+      __DEV__: JSON.stringify(process.env.NODE_ENV !== "production")
     })
   ],
   devServer: {
     compress: true,
+    contentBase: outputDir,
     port: process.env.PORT || 8000,
-    historyApiFallback: true,
-    contentBase: [__dirname + "/public", __dirname + "/assets"]
-  },
-  module: {
-    rules: [
-      {
-        test: /\.css$/,
-        use: ["style-loader", "css-loader"]
-      },
-      {
-        test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
-        use: [
-          {
-            loader: "file-loader",
-            options: {
-              name: "[name].[ext]"
-            }
-          }
-        ]
-      }
-    ]
+    historyApiFallback: true
   }
 }
