@@ -19,9 +19,9 @@ module.exports = {
   ],
   devServer: {
     compress: true,
-    contentBase: outputDir,
     port: process.env.PORT || 8000,
-    historyApiFallback: true
+    historyApiFallback: true,
+    contentBase: [__dirname + "/public", __dirname + "/assets"]
   },
   module: {
     rules: [
@@ -35,8 +35,7 @@ module.exports = {
           {
             loader: "file-loader",
             options: {
-              name: "[name].[ext]",
-              outputPath: "fonts/"
+              name: "[name].[ext]"
             }
           }
         ]
