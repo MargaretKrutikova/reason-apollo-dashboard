@@ -14,7 +14,7 @@ module AddTodoMutation = [%graphql
   {|
   mutation ($text: String!) {
     addTodoSimple(text: $text) {
-      ...Todo.Fragment.TodoItem
+      id
     }
   }
 |}
@@ -23,15 +23,21 @@ module AddTodoMutation = [%graphql
 [@react.component]
 let make = () => {
   let (todosResult, _) = useQuery((module AllTodosQuery));
+
   let (addTodo, addTodoResult, _) = useMutation((module AddTodoMutation));
 
   let (newTodoText, setNewTodoText) = React.useState(() => "");
-  let canAddTodo = newTodoText != "" && addTodoResult != Loading;
 
-  let refetchQueries = _ => [|toQueryObj(AllTodosQuery.make())|];
+  let canAddTodo =
+    switch (addTodoResult) {
+    | Loading => false
+    | _ => true
+    };
 
   let handleAddTodo = () => {
     let variables = AddTodoMutation.make(~text=newTodoText, ())##variables;
+
+    let refetchQueries = _ => [|toQueryObj(AllTodosQuery.make())|];
 
     addTodo(~variables, ~refetchQueries, ())
     |> Js.Promise.(then_(_ => setNewTodoText(_ => "") |> resolve))
@@ -71,9 +77,7 @@ let make = () => {
           {switch (todosResult) {
            | Data(data) =>
              {data##allTodos
-              ->Belt.Array.map(todo =>
-                  <Todo key={todo.id} todo refetchQueries />
-                )}
+              ->Belt.Array.map(todo => <Todo key={todo.id} todo />)}
              |> React.array
            | Loading => <Spinner />
            | Error(_) =>

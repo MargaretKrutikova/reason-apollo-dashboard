@@ -1,4 +1,3 @@
-open ApolloHooks;
 open Types;
 
 module Fragment = [%graphql
@@ -11,70 +10,19 @@ module Fragment = [%graphql
 |}
 ];
 
-module UpdateTodoMutation = [%graphql
-  {|
-  mutation ($id: ID!, $text: String!, $completed: Boolean!) {
-    updateTodoSimple(id: $id, text: $text, completed: $completed) {
-      id
-      text
-      completed
-    }
-  }
-  |}
-];
-
-module DeleteTodoMutation = [%graphql
-  {|
-  mutation ($id: ID!) {
-    deleteTodoSimple(id: $id) {
-      deletedTodoItemId
-    }
-  }
-|}
-];
-
 [@react.component]
-let make = (~todo: todo, ~refetchQueries) => {
-  let (updateTodoItem, _, _) = useMutation((module UpdateTodoMutation));
-  let (deleteTodoItem, _, _) = useMutation((module DeleteTodoMutation));
-
-  let handleUpdate = _ => {
-    let variables =
-      UpdateTodoMutation.make(
-        ~id=todo.id,
-        ~text=todo.text,
-        ~completed=!todo.completed,
-        (),
-      )##variables;
-
-    updateTodoItem(~variables, ()) |> ignore;
-  };
-
-  let handleDelete = _ => {
-    deleteTodoItem(
-      ~variables=DeleteTodoMutation.make(~id=todo.id, ())##variables,
-      ~refetchQueries,
-      (),
-    )
-    |> ignore;
-  };
-
+let make = (~todo) => {
   <li className={Cn.ifTrue("completed", todo.completed)}>
     <div className="form-check">
       <label className="form-check-label">
         <input
           className="checkbox"
           type_="checkbox"
-          checked={todo.completed}
-          onChange=handleUpdate
+          defaultChecked={todo.completed}
         />
         {React.string(todo.text)}
       </label>
     </div>
-    <i
-      onClick=handleDelete
-      role="button"
-      className="remove mdi mdi-close-circle-outline"
-    />
+    <i role="button" className="remove mdi mdi-close-circle-outline" />
   </li>;
 };
