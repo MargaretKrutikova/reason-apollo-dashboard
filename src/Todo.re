@@ -15,9 +15,7 @@ module UpdateTodoMutation = [%graphql
   {|
   mutation ($id: ID!, $text: String!, $completed: Boolean!) {
     updateTodoSimple(id: $id, text: $text, completed: $completed) {
-      id
-      text
-      completed
+      ...Fragment.TodoItem
     }
   }
   |}
@@ -36,6 +34,7 @@ module DeleteTodoMutation = [%graphql
 [@react.component]
 let make = (~todo: todo, ~refetchQueries) => {
   let (updateTodoItem, _, _) = useMutation((module UpdateTodoMutation));
+
   let (deleteTodoItem, _, _) = useMutation((module DeleteTodoMutation));
 
   let handleUpdate = _ => {

@@ -14,7 +14,7 @@ module AddTodoMutation = [%graphql
   {|
   mutation ($text: String!) {
     addTodoSimple(text: $text) {
-      ...Todo.Fragment.TodoItem
+      id
     }
   }
 |}
@@ -23,6 +23,7 @@ module AddTodoMutation = [%graphql
 [@react.component]
 let make = () => {
   let (todosResult, _) = useQuery((module AllTodosQuery));
+
   let (addTodo, addTodoResult, _) = useMutation((module AddTodoMutation));
 
   let (newTodoText, setNewTodoText) = React.useState(() => "");
