@@ -1,6 +1,10 @@
 open Types;
+let str = React.string;
 
-let decodeDate = date => date->Belt.Option.flatMap(Js.Json.decodeString);
+let decodeDate = date =>
+  date
+  ->Belt.Option.flatMap(Js.Json.decodeString)
+  ->Belt.Option.map(Js.Date.fromString);
 
 module Fragment = [%graphql
   {|
@@ -32,16 +36,18 @@ let make = (~ticket) => {
          switch (assignee) {
          | `User(user) => <Avatar user />
          | `WorkingGroup(workingGroup) =>
-           <strong> {React.string(workingGroup.name)} </strong>
+           <strong> {str(workingGroup.name)} </strong>
          }
-       | None => <em> {React.string("Unassigned")} </em>
+       | None => <em> {str("Unassigned")} </em>
        }}
     </td>
-    <td> {React.string(ticket.subject)} </td>
+    <td> {str(ticket.subject)} </td>
     <td> <TicketStatusBadge status={ticket.status} /> </td>
     <td>
-      {React.string(Belt.Option.getWithDefault(ticket.lastUpdated, "-"))}
+      {ticket.lastUpdated
+       ->Belt.Option.mapWithDefault("-", Js.Date.toLocaleString)
+       ->str}
     </td>
-    <td> {React.string(ticket.trackingId)} </td>
+    <td> {str(ticket.trackingId)} </td>
   </tr>;
 };

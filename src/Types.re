@@ -23,7 +23,7 @@ type ticket = {
   subject: string,
   trackingId: string,
   assignee: option(assignee),
-  lastUpdated: option(string),
+  lastUpdated: option(Js.Date.t),
 };
 
 type siteStatistics = {
