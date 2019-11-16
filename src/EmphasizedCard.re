@@ -35,7 +35,7 @@ let make = (~title, ~subText, ~icon, ~variant) => {
         {React.string(title)}
         <i className={"mdi mdi-24px float-right " ++ mapIcon(icon)} />
       </h4>
-      <h2 className="mb-5"> {React.string(subText)} </h2>
+      <h2 className="mb-1"> {React.string(subText)} </h2>
     </div>
   </div>;
 };

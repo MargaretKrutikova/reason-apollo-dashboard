@@ -1315,7 +1315,7 @@ html {
   background: #fff;
 }
 .card .card-body {
-  padding: 2.5rem 2.5rem;
+  /* padding: 2.5rem 2.5rem; */
 }
 .card .card-title {
   color: #343a40;
