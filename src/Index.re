@@ -1,6 +1,6 @@
 ReactDOMRe.renderToElementWithId(
-  <ReasonApolloHooks.ApolloProvider client=GraphqlClient.client>
+  <ApolloHooks.ApolloProvider client=GraphqlClient.client>
     <Main />
-  </ReasonApolloHooks.ApolloProvider>,
+  </ApolloHooks.ApolloProvider>,
   "root",
 );

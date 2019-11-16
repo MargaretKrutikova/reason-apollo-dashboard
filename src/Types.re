@@ -1,7 +1,7 @@
 type todo = {
   id: string,
   text: string,
-  completed: option(bool),
+  completed: bool,
 };
 
 type user = {
@@ -13,17 +13,16 @@ type workingGroup = {
   id: string,
   name: string,
 };
-
 type assignee = [ | `User(user) | `WorkingGroup(workingGroup)];
 
 type status = [ | `Done | `Rejected | `OnHold | `Progress];
 
 type ticket = {
   id: string,
+  status,
   subject: string,
   trackingId: string,
   assignee: option(assignee),
-  status,
   lastUpdated: option(string),
 };
 

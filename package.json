@@ -24,7 +24,7 @@
     "react": "^16.8.1",
     "react-dom": "^16.8.1",
     "reason-apollo": "^0.17.0",
-    "reason-apollo-hooks": "^2.7.0",
+    "reason-apollo-hooks": "git://github.com/jfrolich/reason-apollo-hooks.git#api-change-retry",
     "reason-react": ">=0.7.0"
   },
   "devDependencies": {

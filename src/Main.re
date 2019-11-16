@@ -7,11 +7,10 @@ module MainConfig = [%graphql
   }
 |}
 ];
-module MainQuery = ReasonApolloHooks.Query.Make(MainConfig);
 
 [@react.component]
 let make = () => {
-  let (simple, _) = MainQuery.use();
+  let (simple, _) = ApolloHooks.useQuery((module MainConfig));
 
   <div className="main-panel">
     <div className="content-wrapper">

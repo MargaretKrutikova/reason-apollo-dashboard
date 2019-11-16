@@ -1,3 +1,4 @@
+open ApolloHooks;
 open Types;
 
 module Fragment = [%graphql
@@ -10,7 +11,7 @@ module Fragment = [%graphql
 |}
 ];
 
-module UpdateTodoItemConfig = [%graphql
+module UpdateTodoMutation = [%graphql
   {|
   mutation ($id: ID!, $text: String!, $completed: Boolean!) {
     updateTodoSimple(id: $id, text: $text, completed: $completed) {
@@ -21,9 +22,8 @@ module UpdateTodoItemConfig = [%graphql
   }
   |}
 ];
-module UpdateTodoItem = ReasonApolloHooks.Mutation.Make(UpdateTodoItemConfig);
 
-module DeleteTodoItemConfig = [%graphql
+module DeleteTodoMutation = [%graphql
   {|
   mutation ($id: ID!) {
     deleteTodoSimple(id: $id) {
@@ -32,22 +32,18 @@ module DeleteTodoItemConfig = [%graphql
   }
 |}
 ];
-module DeleteTodoItem = ReasonApolloHooks.Mutation.Make(DeleteTodoItemConfig);
 
 [@react.component]
-let make = (~todo, ~refetchQueries) => {
-  let completed =
-    todo.completed->Belt.Option.mapWithDefault(false, value => value);
-
-  let (updateTodoItem, _, _) = UpdateTodoItem.use();
-  let (deleteTodoItem, _, _) = DeleteTodoItem.use();
+let make = (~todo: todo, ~refetchQueries) => {
+  let (updateTodoItem, _, _) = useMutation((module UpdateTodoMutation));
+  let (deleteTodoItem, _, _) = useMutation((module DeleteTodoMutation));
 
   let handleUpdate = _ => {
     let variables =
-      UpdateTodoItemConfig.make(
+      UpdateTodoMutation.make(
         ~id=todo.id,
         ~text=todo.text,
-        ~completed=!completed,
+        ~completed=!todo.completed,
         (),
       )##variables;
 
@@ -56,20 +52,20 @@ let make = (~todo, ~refetchQueries) => {
 
   let handleDelete = _ => {
     deleteTodoItem(
-      ~variables=DeleteTodoItemConfig.make(~id=todo.id, ())##variables,
-      ~refetchQueries=_ => refetchQueries,
+      ~variables=DeleteTodoMutation.make(~id=todo.id, ())##variables,
+      ~refetchQueries,
       (),
     )
     |> ignore;
   };
 
-  <li className={Cn.ifTrue("completed", completed)}>
+  <li className={Cn.ifTrue("completed", todo.completed)}>
     <div className="form-check">
       <label className="form-check-label">
         <input
           className="checkbox"
           type_="checkbox"
-          checked=completed
+          checked={todo.completed}
           onChange=handleUpdate
         />
         {React.string(todo.text)}

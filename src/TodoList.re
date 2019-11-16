@@ -1,4 +1,6 @@
-module AllTodosConfig = [%graphql
+open ApolloHooks;
+
+module AllTodosQuery = [%graphql
   {|
   query {
     allTodos {
@@ -7,9 +9,8 @@ module AllTodosConfig = [%graphql
   }
 |}
 ];
-module AllTodosQuery = ReasonApolloHooks.Query.Make(AllTodosConfig);
 
-module AddTodoConfig = [%graphql
+module AddTodoMutation = [%graphql
   {|
   mutation ($text: String!) {
     addTodoSimple(text: $text) {
@@ -18,33 +19,32 @@ module AddTodoConfig = [%graphql
   }
 |}
 ];
-module AddTodoMutation = ReasonApolloHooks.Mutation.Make(AddTodoConfig);
 
 [@react.component]
 let make = () => {
-  let (todosResult, _) = AllTodosQuery.use();
-  let (addTodo, addTodoStatus, _) = AddTodoMutation.use();
+  let (todosResult, _) = useQuery((module AllTodosQuery));
+  let (addTodo, addTodoResult, _) = useMutation((module AddTodoMutation));
 
   let (newTodoText, setNewTodoText) = React.useState(() => "");
-  let canAdd = newTodoText != "" && addTodoStatus != Loading;
+  let canAddTodo = newTodoText != "" && addTodoResult != Loading;
 
-  let refetchQueries = [|
-    ReasonApolloHooks.Utils.toQueryObj(AllTodosConfig.make()),
-  |];
+  let refetchQueries = _ => [|toQueryObj(AllTodosQuery.make())|];
+
+  let handleAddTodo = () => {
+    let variables = AddTodoMutation.make(~text=newTodoText, ())##variables;
+
+    addTodo(~variables, ~refetchQueries, ())
+    |> Js.Promise.(then_(_ => setNewTodoText(_ => "") |> resolve))
+    |> ignore;
+  };
+
   <div className="card">
     <div className="card-body">
       <h4 className="card-title text-white"> {React.string("Todo")} </h4>
       <form
         onSubmit={e => {
           ReactEvent.Form.preventDefault(e);
-
-          addTodo(
-            ~variables=AddTodoConfig.make(~text=newTodoText, ())##variables,
-            ~refetchQueries=_ => refetchQueries,
-            (),
-          )
-          |> Js.Promise.(then_(_ => setNewTodoText(_ => "") |> resolve))
-          |> ignore;
+          handleAddTodo();
         }}>
         <div className="add-items d-flex">
           <input
@@ -61,7 +61,7 @@ let make = () => {
             type_="submit"
             className="add btn btn-gradient-primary font-weight-bold todo-list-add-btn"
             id="add-task"
-            disabled={!canAdd}>
+            disabled={!canAddTodo}>
             {React.string("Add")}
           </button>
         </div>

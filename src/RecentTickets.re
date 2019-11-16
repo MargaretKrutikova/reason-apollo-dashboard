@@ -1,4 +1,6 @@
-module TicketsConfig = [%graphql
+open ApolloHooks;
+
+module TicketsQuery = [%graphql
   {|
   query($offset: Int!, $limit: Int!) {
     tickets(offset: $offset, limit: $limit) {
@@ -11,13 +13,12 @@ module TicketsConfig = [%graphql
   }
 |}
 ];
-module TicketsQuery = ReasonApolloHooks.Query.Make(TicketsConfig);
 
-external toConfigType: Js.Json.t => TicketsConfig.t = "%identity";
-external toJson: TicketsConfig.t => Js.Json.t = "%identity";
+external toConfigType: Js.Json.t => TicketsQuery.t = "%identity";
+external toJson: TicketsQuery.t => Js.Json.t = "%identity";
 
 let mergeFetchMoreResult = (prevData, options): Js.Json.t => {
-  let fetchMoreResult = options->ReasonApolloHooks.Query.fetchMoreResultGet;
+  let fetchMoreResult = options->Query.fetchMoreResultGet;
 
   switch (fetchMoreResult) {
   | Some(currentData) =>
@@ -40,18 +41,17 @@ let limit = 2;
 
 [@react.component]
 let make = () => {
-  let (_, full) =
-    TicketsQuery.use(
-      ~variables=TicketsConfig.make(~offset=0, ~limit, ())##variables,
+  let (_, fullResult) =
+    useQuery(
+      ~variables=TicketsQuery.make(~offset=0, ~limit, ())##variables,
       ~notifyOnNetworkStatusChange=true,
-      (),
+      (module TicketsQuery),
     );
 
-  let isFetchingMore =
-    full.networkStatus === ReasonApolloHooks.Types.FetchMore;
+  let isFetchingMore = fullResult.networkStatus === ApolloHooksTypes.FetchMore;
 
   let (hasNextPage, offset) =
-    switch (full) {
+    switch (fullResult) {
     | {data: Some(data)} => (
         data##tickets##hasNextPage,
         data##tickets##results->Belt.Array.length,
@@ -60,8 +60,8 @@ let make = () => {
     };
 
   let handleLoadMore = () => {
-    full.fetchMore(
-      ~variables=TicketsConfig.make(~offset, ~limit, ())##variables,
+    fullResult.fetchMore(
+      ~variables=TicketsQuery.make(~offset, ~limit, ())##variables,
       ~updateQuery=mergeFetchMoreResult,
       (),
     )
@@ -82,7 +82,7 @@ let make = () => {
               <th> {React.string("Tracking ID")} </th>
             </tr>
           </thead>
-          {switch (full) {
+          {switch (fullResult) {
            | {loading: true, data: None} => React.null
            | {data: Some(data)} =>
              <tbody>
