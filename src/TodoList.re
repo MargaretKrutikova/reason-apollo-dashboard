@@ -10,6 +10,36 @@ module AllTodosQuery = [%graphql
 |}
 ];
 
+external castToTodos: Js.Json.t => AllTodosQuery.t = "%identity";
+
+/** cache read/write modules for all todos */
+module TodosReadQuery = ApolloClient.ReadQuery(AllTodosQuery);
+module TodosWriteQuery = ApolloClient.WriteQuery(AllTodosQuery);
+
+let readTodosFromCache = client => {
+  let query = AllTodosQuery.make() |> toReadQueryOptions;
+
+  switch (TodosReadQuery.readQuery(client, query)) {
+  | exception _ => None
+  | cachedTodos => cachedTodos->Js.Nullable.toOption
+  };
+};
+
+let writeTodosToCache = (client, todos) => {
+  TodosWriteQuery.make(~client, ~data={"allTodos": todos}, ());
+};
+
+let removeTodoFromCache = (client, todoId) => {
+  let data = readTodosFromCache(client)->Belt.Option.map(castToTodos);
+  switch (data) {
+  | Some(todos) =>
+    let updatedTodos =
+      todos##allTodos->Belt.Array.keep(todo => todo##id != todoId);
+    writeTodosToCache(client, updatedTodos);
+  | None => ()
+  };
+};
+
 module AddTodoMutation = [%graphql
   {|
   mutation ($text: String!) {
@@ -28,12 +58,12 @@ let make = () => {
   let (newTodoText, setNewTodoText) = React.useState(() => "");
   let canAddTodo = newTodoText != "" && addTodoResult != Loading;
 
-  let refetchQueries = _ => [|toQueryObj(AllTodosQuery.make())|];
-
   let handleAddTodo = () => {
-    let variables = AddTodoMutation.make(~text=newTodoText, ())##variables;
-
-    addTodo(~variables, ~refetchQueries, ())
+    addTodo(
+      ~variables=AddTodoMutation.make(~text=newTodoText, ())##variables,
+      ~refetchQueries=_ => [|toQueryObj(AllTodosQuery.make())|],
+      (),
+    )
     |> Js.Promise.(then_(_ => setNewTodoText(_ => "") |> resolve))
     |> ignore;
   };
@@ -72,7 +102,7 @@ let make = () => {
            | Data(data) =>
              {data##allTodos
               ->Belt.Array.map(todo =>
-                  <Todo key={todo.id} todo refetchQueries />
+                  <Todo key={todo##id} todo onDelete=removeTodoFromCache />
                 )}
              |> React.array
            | Loading => <Spinner />

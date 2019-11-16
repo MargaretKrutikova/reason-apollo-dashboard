@@ -1,9 +1,8 @@
 open ApolloHooks;
-open Types;
 
 module Fragment = [%graphql
   {|
-  fragment TodoItem on TodoItem @bsRecord {
+  fragment TodoItem on TodoItem {
     id
     text
     completed
@@ -32,16 +31,30 @@ module DeleteTodoMutation = [%graphql
 ];
 
 [@react.component]
-let make = (~todo: todo, ~refetchQueries) => {
+let make = (~todo, ~onDelete) => {
   let (updateTodoItem, _, _) = useMutation((module UpdateTodoMutation));
-  let (deleteTodoItem, _, _) = useMutation((module DeleteTodoMutation));
+  let (deleteTodoItem, _, _) =
+    useMutation(
+      ~update=
+        (cache, result: Mutation.mutationResult(DeleteTodoMutation.t)) => {
+          let idToDelete =
+            result##data##deleteTodoSimple
+            ->Belt.Option.map(data => data##deletedTodoItemId);
+
+          switch (idToDelete) {
+          | None => ()
+          | Some(id) => onDelete(cache, id)
+          };
+        },
+      (module DeleteTodoMutation),
+    );
 
   let handleUpdate = _ => {
     let variables =
       UpdateTodoMutation.make(
-        ~id=todo.id,
-        ~text=todo.text,
-        ~completed=!todo.completed,
+        ~id=todo##id,
+        ~text=todo##text,
+        ~completed=!todo##completed,
         (),
       )##variables;
 
@@ -50,23 +63,22 @@ let make = (~todo: todo, ~refetchQueries) => {
 
   let handleDelete = _ => {
     deleteTodoItem(
-      ~variables=DeleteTodoMutation.make(~id=todo.id, ())##variables,
-      ~refetchQueries,
+      ~variables=DeleteTodoMutation.make(~id=todo##id, ())##variables,
       (),
     )
     |> ignore;
   };
 
-  <li className={Cn.ifTrue("completed", todo.completed)}>
+  <li className={Cn.ifTrue("completed", todo##completed)}>
     <div className="form-check">
       <label className="form-check-label">
         <input
           className="checkbox"
           type_="checkbox"
-          checked={todo.completed}
+          checked=todo##completed
           onChange=handleUpdate
         />
-        {React.string(todo.text)}
+        {React.string(todo##text)}
       </label>
     </div>
     <i
