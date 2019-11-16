@@ -21,8 +21,8 @@ let make = () => {
        | _ => React.null
        }}
       <div className="row">
-        <div className="col-8 grid-margin"> <RecentTickets /> </div>
-        <div className="col-4 grid-margin"> <TodoList /> </div>
+        <div className="col-7 grid-margin"> <RecentTickets /> </div>
+        <div className="col-5 grid-margin"> <TodoList /> </div>
       </div>
     </div>
   </div>;
