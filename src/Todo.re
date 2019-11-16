@@ -15,9 +15,7 @@ module UpdateTodoMutation = [%graphql
   {|
   mutation ($id: ID!, $text: String!, $completed: Boolean!) {
     updateTodoSimple(id: $id, text: $text, completed: $completed) {
-      id
-      text
-      completed
+      ...Fragment.TodoItem
     }
   }
   |}

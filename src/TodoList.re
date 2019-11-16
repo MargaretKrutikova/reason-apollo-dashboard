@@ -14,7 +14,7 @@ module AddTodoMutation = [%graphql
   {|
   mutation ($text: String!) {
     addTodoSimple(text: $text) {
-      ...Todo.Fragment.TodoItem
+      id
     }
   }
 |}
