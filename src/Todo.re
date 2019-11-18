@@ -1,4 +1,8 @@
-open Types;
+type todo = {
+  id: string,
+  text: string,
+  completed: bool,
+};
 
 module Fragment = [%graphql
   {|
