@@ -14,16 +14,14 @@ module TicketsQuery = [%graphql
 |}
 ];
 
-external toConfigType: Js.Json.t => TicketsQuery.t = "%identity";
+external toTickets: Js.Json.t => TicketsQuery.t = "%identity";
 external toJson: TicketsQuery.t => Js.Json.t = "%identity";
 
-let mergeFetchMoreResult = (prevData, options): Js.Json.t => {
-  let fetchMoreResult = options->Query.fetchMoreResultGet;
-
-  switch (fetchMoreResult) {
-  | Some(currentData) =>
-    let newResult = toConfigType(currentData)##tickets;
-    let prevResult = toConfigType(prevData)##tickets;
+let mergeTickets = (prevData, options): Js.Json.t => {
+  switch (options->Query.fetchMoreResultGet) {
+  | Some(newData) =>
+    let newResult = toTickets(newData)##tickets;
+    let prevResult = toTickets(prevData)##tickets;
 
     let mergedResult = {
       "tickets": {
@@ -37,7 +35,7 @@ let mergeFetchMoreResult = (prevData, options): Js.Json.t => {
   };
 };
 
-let limit = 2;
+let limit = 3;
 
 [@react.component]
 let make = () => {
