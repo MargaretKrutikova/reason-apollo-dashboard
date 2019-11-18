@@ -40,8 +40,7 @@ let make = () => {
              {data##allTodos
               ->Belt.Array.map(todo => <Todo key={todo.id} todo />)}
              |> React.array
-           | Error(_) =>
-             <div> {"Ooops! En error occured." |> React.string} </div>
+           | Error(_) => <div> {"En error occured." |> React.string} </div>
            | NoData => React.null
            }}
         </ul>
