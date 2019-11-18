@@ -60,7 +60,7 @@ let make = () => {
   let handleLoadMore = () => {
     fullResult.fetchMore(
       ~variables=TicketsQuery.make(~offset, ~limit, ())##variables,
-      ~updateQuery=mergeFetchMoreResult,
+      ~updateQuery=mergeTickets,
       (),
     )
     |> ignore;
