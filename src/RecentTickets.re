@@ -39,32 +39,35 @@ let limit = 3;
 
 [@react.component]
 let make = () => {
-  let (_, fullResult) =
+  let (simpleResult, fullResult) =
     useQuery(
       ~variables=TicketsQuery.make(~offset=0, ~limit, ())##variables,
       ~notifyOnNetworkStatusChange=true,
       (module TicketsQuery),
     );
 
-  let isFetchingMore = fullResult.networkStatus === ApolloHooksTypes.FetchMore;
-
-  let (hasNextPage, offset) =
-    switch (fullResult) {
-    | {data: Some(data)} => (
-        data##tickets##hasNextPage,
-        data##tickets##results->Belt.Array.length,
-      )
-    | _ => (false, 0)
-    };
-
   let handleLoadMore = () => {
+    let offset =
+      switch (simpleResult) {
+      | Data(data) => data##tickets##results->Belt.Array.length
+      | _ => 0
+      };
+
     fullResult.fetchMore(
       ~variables=TicketsQuery.make(~offset, ~limit, ())##variables,
-      ~updateQuery=mergeFetchMoreResult,
+      ~updateQuery=mergeTickets,
       (),
     )
     |> ignore;
   };
+
+  let isFetchingMore = fullResult.networkStatus === ApolloHooksTypes.FetchMore;
+
+  let hasNextPage =
+    switch (simpleResult) {
+    | Data(data) => data##tickets##hasNextPage
+    | _ => false
+    };
 
   <div className="card">
     <div className="card-body">
