@@ -80,7 +80,6 @@ let make = () => {
               <th> {React.string("Subject")} </th>
               <th> {React.string("Status")} </th>
               <th> {React.string("Last Update")} </th>
-              <th> {React.string("Tracking ID")} </th>
             </tr>
           </thead>
           {switch (fullResult) {

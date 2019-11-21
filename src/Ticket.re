@@ -20,7 +20,6 @@ module Fragment = [%graphql
     }
     id
     subject
-    trackingId
     status
     lastUpdated @bsDecoder(fn: "decodeDate")
   }
@@ -48,6 +47,5 @@ let make = (~ticket) => {
        ->Belt.Option.mapWithDefault("-", Js.Date.toLocaleString)
        ->str}
     </td>
-    <td> {str(ticket.trackingId)} </td>
   </tr>;
 };

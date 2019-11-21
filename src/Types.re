@@ -21,7 +21,6 @@ type ticket = {
   id: string,
   status,
   subject: string,
-  trackingId: string,
   assignee: option(assignee),
   lastUpdated: option(Js.Date.t),
 };
